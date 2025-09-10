@@ -18,7 +18,12 @@ redis_client = redis.Redis(
 redis_app_cache_hit = Counter(
     "redis_app_cache_hit",
     "Number of cache hits when getting items from Redis",
-    ["key"],
+    ['key']
+)
+
+redis_app_cache_miss = Counter(
+    'redis_app_cache_miss',
+    "Number of cache missed when getting items from Redis",
 )
 
 request_count = Counter(
@@ -109,6 +114,7 @@ def get_item(key):
     try:
         value = redis_client.get(key)
         if value is None:
+            redis_app_cache_miss.inc()
             return jsonify({"error": "Key not found"}), 404
 
         # Increment cache hit counter
